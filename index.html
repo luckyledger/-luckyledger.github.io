@@ -79,14 +79,13 @@
         <p id="result"></p>
         </div>
     </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.9/web3.min.js"></script>
     <script>
-        let web3 = new Web3(window.ethereum);
-        let account;
+    let web3 = new Web3(window.ethereum);
+    let account;
 
-        // TODO: replace with your contract's ABI
-        let contractABI = [
+    // TODO: replace with your contract's ABI
+    let contractABI = [
 	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
@@ -183,37 +182,76 @@
 		"type": "function"
 	}
 ];
-        // TODO: replace with your contract's address
-        let contractAddress = '0x7E44e15c25829d62352109A8D865E81a3097DB74';
 
-        let contract;
+    // TODO: replace with your contract's address
+    let contractAddress = '0x7E44e15c25829d62352109A8D865E81a3097DB74';
 
-        window.ethereum.enable().then((accounts) => {
-            account = accounts[0];
-            contract = new web3.eth.Contract(contractABI, contractAddress, { from: account });
+    let contract;
 
-            setInterval(async () => {
-                let balance = await web3.eth.getBalance(account);
-                document.getElementById('balance').innerText = `${web3.utils.fromWei(balance)} BNB`;
-            }, 1000);
-
-            document.getElementById('betButton').onclick = () => {
-                let amount = document.getElementById('betAmount').value;
-                let amountWei = web3.utils.toWei(amount);
-
-                contract.methods.play().send({ value: amountWei })
-                    .on('receipt', (receipt) => {
-                        if (receipt.events.Won) {
-                            document.getElementById('result').innerText = 'You won! 🎉';
-                        } else {
-                            document.getElementById('result').innerText = 'You lost... 😞';
-                        }
-                    })
-                    .on('error', (error) => {
-                        document.getElementById('result').innerText = 'An error occurred... 😞';
+    // Function to switch to BSC Mainnet
+    async function switchToBSC() {
+        try {
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: '0x38' }], // 0x38 is the chain ID for BSC Mainnet
+            });
+        } catch (switchError) {
+            // This error code indicates that the chain has not been added to MetaMask.
+            if (switchError.code === 4902) {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: '0x38',
+                            chainName: 'Binance Smart Chain Mainnet',
+                            nativeCurrency: {
+                                name: 'BNB',
+                                symbol: 'bnb',
+                                decimals: 18
+                            },
+                            rpcUrls: ['https://bsc.meowrpc.com'],
+                            blockExplorerUrls: ['https://bscscan.com/']
+                        }],
                     });
-            };
-        });
+                } catch (addError) {
+                    console.error(addError);
+                }
+            } else {
+                console.error(switchError);
+            }
+        }
+    }
+
+    window.ethereum.enable().then((accounts) => {
+        account = accounts[0];
+        contract = new web3.eth.Contract(contractABI, contractAddress, { from: account });
+
+        // Switch to BSC Mainnet when the page loads
+        switchToBSC();
+
+        setInterval(async () => {
+            let balance = await web3.eth.getBalance(account);
+            document.getElementById('balance').innerText = `${web3.utils.fromWei(balance)} BNB`;
+        }, 1000);
+
+        document.getElementById('betButton').onclick = () => {
+            let amount = document.getElementById('betAmount').value;
+            let amountWei = web3.utils.toWei(amount);
+
+            contract.methods.play().send({ value: amountWei })
+                .on('receipt', (receipt) => {
+                    if (receipt.events.Won) {
+                        document.getElementById('result').innerText = 'You won! 🎉';
+                    } else {
+                        document.getElementById('result').innerText = 'You lost... 😞';
+                    }
+                })
+                .on('error', (error) => {
+                    document.getElementById('result').innerText = 'An error occurred... 😞';
+                });
+        };
+    });
     </script>
+
 </body>
 </html>
