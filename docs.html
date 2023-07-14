@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>LuckyLedger Smart Contract</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .contract-info,
+        .faq-item {
+            border: 1px solid #333;
+            padding: 20px;
+            margin-bottom: 10px;
+        }
+
+        .contract-info h3,
+        .faq-item h3 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>LuckyLedger Smart Contract</h1>
+
+    <div class="contract-info">
+        <h3>Contract Address</h3>
+        <p>0xcda2386847CbCA57F89C765bB915f2bC87c6b61B</p>
+    </div>
+
+    <div class="contract-info">
+        <h3>Owner Address</h3>
+        <p>0x7Eeb97b418bb475d570A7a03fD7D4118Dd45a0a3</p>
+    </div>
+
+    <div class="contract-info">
+        <h3>Contract Description</h3>
+        <p>LuckyLedger is a game where users can bet BNB. The contract deducts a 5% fee, then the user either wins or loses their bet depending on the result of a pseudo-random number generation.</p>
+    </div>
+
+    <div class="contract-info">
+        <h3>Roles & Functions</h3>
+        <ul>
+            <li><strong>Owner:</strong> The owner is the account that deploys the contract. They have exclusive rights to withdraw funds from the contract.</li>
+            <li><strong>Player:</strong> Any account that interacts with the contract to play the game. They send BNB to the contract and may win or lose their bet.</li>
+            <li><strong>withdraw(uint256 amount):</strong> Exclusively callable by the owner. Withdraws the specified amount from the contract.</li>
+            <li><strong>play():</strong> Callable by any account. The account sends BNB and may win or lose their bet.</li>
+            <li><strong>getBalance():</strong> Returns the current balance of the contract.</li>
+        </ul>
+    </div>
+
+    <h2>Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+        <h3>Why does my transaction always fail?</h3>
+        <p>Your transaction might be failing due to a couple of reasons. One possible reason is if you're trying to play the game without sending any BNB; the contract requires a non-zero BNB bet to play. Another reason might be RPC url reasons, try changing RPC url!</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>Why can't I withdraw funds from the contract?</h3>
+        <p>Only the owner of the contract can withdraw funds from it. If you're not the owner, your withdrawal transaction will fail. If you are the owner and still can't withdraw, ensure the contract has enough balance for your withdrawal amount.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>How is the result of my bet determined?</h3>
+        <p>The result of your bet is determined by a random number generation process. If the generated number is even, you win your bet otherwise, you lose your bet.</p>
+    </div>
+
+</body>
+
+</html>
