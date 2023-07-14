@@ -65,8 +65,8 @@
     </div>
     <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
     <script>
-// Replace with your contract's ABI
-const abi = [
+    // Replace with your contract's ABI
+    const abi = [
 	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
@@ -193,44 +193,81 @@ const abi = [
 	}
 ];
 
-// Replace with your contract's address
-const contractAddress = '0x709850E15C5795Ed58412fD1cac296d85Cfb65A0';
+    // Replace with your contract's address
+    const contractAddress = '0x709850E15C5795Ed58412fD1cac296d85Cfb65A0';
 
-let contract;
-let accounts;
+    let contract;
+    let accounts;
 
-window.addEventListener('load', async () => {
-    // Modern dapp browsers...
-    if (window.ethereum) {
-        window.web3 = new Web3(ethereum);
+    // Function to switch to BSC Mainnet
+    async function switchToBSC() {
         try {
-            // Request account access if needed
-            await ethereum.enable();
-            accounts = await web3.eth.getAccounts();
-            contract = new web3.eth.Contract(abi, contractAddress);
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: '0x38' }], // 0x38 is the chain ID for BSC Mainnet
+            });
+        } catch (switchError) {
+            // This error code indicates that the chain has not been added to MetaMask.
+            if (switchError.code === 4902) {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: '0x38',
+                            chainName: 'Binance Smart Chain Mainnet',
+                            nativeCurrency: {
+                                name: 'BNB',
+                                symbol: 'bnb',
+                                decimals: 18
+                            },
+                            rpcUrls: ['https://bsc.meowrpc.com'],
+                            blockExplorerUrls: ['https://bscscan.com/']
+                        }],
+                    });
+                } catch (addError) {
+                    console.error(addError);
+                }
+            } else {
+                console.error(switchError);
+            }
+        }
+    }
+
+    window.addEventListener('load', async () => {
+        // Modern dapp browsers...
+        if (window.ethereum) {
+            window.web3 = new Web3(ethereum);
+            try {
+                // Request account access if needed
+                await ethereum.enable();
+                accounts = await web3.eth.getAccounts();
+                contract = new web3.eth.Contract(abi, contractAddress);
+
+                // Switch to BSC Mainnet when the page loads
+                switchToBSC();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        // Legacy dapp browsers...
+        else if (window.web3) {
+            window.web3 = new Web3(web3.currentProvider);
+        }
+        // Non-dapp browsers...
+        else {
+            console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+        }
+    });
+
+    document.getElementById('joinButton').addEventListener('click', async () => {
+        const telegramUsername = document.getElementById('telegramUsername').value;
+        try {
+            await contract.methods.joinWaitlist(telegramUsername).send({ from: accounts[0], value: web3.utils.toWei('0.0005', 'ether') });
+            alert('Successfully joined the waitlist!');
         } catch (error) {
             console.error(error);
         }
-    }
-    // Legacy dapp browsers...
-    else if (window.web3) {
-        window.web3 = new Web3(web3.currentProvider);
-    }
-    // Non-dapp browsers...
-    else {
-        console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
-    }
-});
-
-document.getElementById('joinButton').addEventListener('click', async () => {
-    const telegramUsername = document.getElementById('telegramUsername').value;
-    try {
-        await contract.methods.joinWaitlist(telegramUsername).send({ from: accounts[0], value: web3.utils.toWei('0.0005', 'ether') });
-        alert('Successfully joined the waitlist!');
-    } catch (error) {
-        console.error(error);
-    }
-});
+    });
     </script>
 </body>
 </html>
